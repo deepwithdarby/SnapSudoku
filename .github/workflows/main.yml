@@ -25,7 +25,7 @@ jobs:
           git config --global user.email "github-actions@users.noreply.github.com"
           
           # Add HF Space as remote
-          git remote add hf-space https://huggingface.co/spaces/satyaprakashmohanty13/Repo-push
+          git remote add hf-space https://$HF_TOKEN@huggingface.co/spaces/satyaprakashmohanty13/Repo-push
           
           # Push master branch to HF Space main branch
           git push --force hf-space master:main
