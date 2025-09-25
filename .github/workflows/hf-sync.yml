@@ -3,19 +3,17 @@ name: Sync to Hugging Face Space
 on:
   push:
     branches:
-      - master  # triggers only on master branch
+      - master
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Check out the code
       - uses: actions/checkout@v3
         with:
           ref: master
           fetch-depth: 0
 
-      # Step 2: Configure Git and push
       - name: Push to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -23,14 +21,8 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@users.noreply.github.com"
 
-          # Set a credential helper to use the token for all Hugging Face URLs
-          git config --global credential.helper store
-
-          # Create a temporary credentials file for Hugging Face
-          echo "https://$HF_TOKEN:@huggingface.co" > ~/.git-credentials
-
-          # Add HF Space remote
-          git remote add hf-space https://huggingface.co/spaces/satyaprakashmohanty13/Repo-push
+          # Add HF Space remote using token for authentication
+          git remote add hf-space https://YOUR_HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/satyaprakashmohanty13/Repo-push
 
           # Push master branch to HF Space main branch
           git push --force hf-space master:main
