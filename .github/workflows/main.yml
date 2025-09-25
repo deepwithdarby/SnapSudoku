@@ -1,6 +1,6 @@
 name: Sync to Hugging Face Space
 
-# Trigger only when pushing to main branch
+# Trigger only when pushing to master branch
 on:
   push:
     branches:
@@ -13,12 +13,13 @@ jobs:
       # Step 1: Check out the branch
       - uses: actions/checkout@v3
         with:
+          ref: master   # Checkout the master branch
           fetch-depth: 0
 
       # Step 2: Push to Hugging Face Space
       - name: Push to Hugging Face Space
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}  # Hugging Face token stored as secret
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@users.noreply.github.com"
@@ -26,5 +27,5 @@ jobs:
           # Add HF Space as remote
           git remote add hf-space https://huggingface.co/spaces/satyaprakashmohanty13/Repo-push
           
-          # Push main branch to HF Space main branch
-          git push --force hf-space main:main
+          # Push master branch to HF Space main branch
+          git push --force hf-space master:main
