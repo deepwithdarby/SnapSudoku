@@ -1,4 +1,4 @@
-name: Sync to Hugging Face Space
+name: Sync to Hugging Face Space (skip binaries)
 
 on:
   push:
@@ -10,30 +10,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
+      # Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          ref: master
           fetch-depth: 0
 
-      # Step 2: Set Git identity
+      # Configure Git identity
       - name: Configure Git
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@users.noreply.github.com"
 
-      # Step 3: Remove files > 50 MB
-      - name: Remove files over 50MB
+      # Remove all image binaries before pushing
+      - name: Remove image binaries
         run: |
-          find . -type f -size +50M -exec git rm --cached -f {} \; || echo "No files over 50MB"
+          find . -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" \) -exec git rm -f --cached {} \; || echo "No binaries found"
+          git commit -m "Remove binaries for HF push" || echo "No binaries to remove"
 
-      # Step 4: Push to Hugging Face Space
+      # Push cleaned repo to Hugging Face Space
       - name: Push to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git remote add hf-space https://satyaprakashmohanty13:$HF_TOKEN@huggingface.co/spaces/satyaprakashmohanty13/Repo-push
-          git add .
-          git commit -m "Sync repo to HF Space" || echo "No changes to commit"
           git push --force hf-space master:main
