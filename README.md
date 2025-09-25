@@ -1,5 +1,5 @@
 SnapSudoku
-===================
+========= ========
 
 *Take a picture of a Sudoku and have SnapSudoku solve it for you!*
 
