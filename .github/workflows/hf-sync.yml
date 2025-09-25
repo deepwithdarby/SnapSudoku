@@ -1,19 +1,39 @@
-name: Sync to Hugging Face Space
+name: Sync GitHub Repo to Hugging Face Space
 
 on:
   push:
     branches:
-      - master
+      - master  # Trigger workflow on master branch
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      # Step 1: Checkout the code
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
           ref: master
           fetch-depth: 0
 
+      # Step 2: Install Git LFS
+      - name: Install Git LFS
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git-lfs
+          git lfs install
+
+      # Step 3: Track binary files with Git LFS
+      - name: Track binary files with Git LFS
+        run: |
+          git lfs track "*.jpg"
+          git lfs track "*.jpeg"
+          git lfs track "*.png"
+          git add .gitattributes
+          git commit -m "Track binary files with Git LFS" || echo "No changes to commit"
+
+      # Step 4: Push to Hugging Face Space
       - name: Push to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -21,8 +41,8 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@users.noreply.github.com"
 
-          # Add HF Space remote using token for authentication
-          git remote add hf-space https://YOUR_HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/satyaprakashmohanty13/Repo-push
+          # Add Hugging Face Space as remote
+          git remote add hf-space https://satyaprakashmohanty13:$HF_TOKEN@huggingface.co/spaces/satyaprakashmohanty13/Repo-push
 
           # Push master branch to HF Space main branch
           git push --force hf-space master:main
