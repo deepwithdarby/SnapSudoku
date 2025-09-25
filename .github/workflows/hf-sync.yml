@@ -1,54 +1,39 @@
-name: Sync GitHub Repo to Hugging Face Space
+name: Sync to Hugging Face Space
 
 on:
   push:
     branches:
-      - master  # Trigger workflow on master branch
+      - master
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
+          ref: master
           fetch-depth: 0
 
-      # Step 2: Install Git LFS
-      - name: Install Git LFS
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y git-lfs
-          git lfs install
-
-      # Step 3: Track all images in the repo
-      - name: Track image files with Git LFS
-        run: |
-          git lfs track "*.jpg"
-          git lfs track "*.jpeg"
-          git lfs track "*.png"
-          git add .gitattributes
-          git commit -m "Track binary files with Git LFS" || echo "No changes to commit"
-
-      # Step 4: Convert existing binaries to LFS
-      - name: Convert existing binaries to LFS
-        run: |
-          # Find all images in the repo and re-add them for LFS
-          find . -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" \) -exec git add {} \;
-          git commit -m "Move existing binaries to LFS" || echo "No binaries to convert"
-
-      # Step 5: Push to Hugging Face Space
-      - name: Push to Hugging Face Space
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      # Step 2: Set Git identity
+      - name: Configure Git
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@users.noreply.github.com"
 
-          # Add HF Space remote using token authentication
-          git remote add hf-space https://satyaprakashmohanty13:$HF_TOKEN@huggingface.co/spaces/satyaprakashmohanty13/Repo-push
+      # Step 3: Remove files > 50 MB
+      - name: Remove files over 50MB
+        run: |
+          find . -type f -size +50M -exec git rm --cached -f {} \; || echo "No files over 50MB"
 
-          # Push master branch to HF Space main branch
+      # Step 4: Push to Hugging Face Space
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git remote add hf-space https://satyaprakashmohanty13:$HF_TOKEN@huggingface.co/spaces/satyaprakashmohanty13/Repo-push
+          git add .
+          git commit -m "Sync repo to HF Space" || echo "No changes to commit"
           git push --force hf-space master:main
