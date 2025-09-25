@@ -14,7 +14,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          ref: master
           fetch-depth: 0
 
       # Step 2: Install Git LFS
@@ -24,8 +23,8 @@ jobs:
           sudo apt-get install -y git-lfs
           git lfs install
 
-      # Step 3: Track binary files with Git LFS
-      - name: Track binary files with Git LFS
+      # Step 3: Track all images in the repo
+      - name: Track image files with Git LFS
         run: |
           git lfs track "*.jpg"
           git lfs track "*.jpeg"
@@ -33,7 +32,14 @@ jobs:
           git add .gitattributes
           git commit -m "Track binary files with Git LFS" || echo "No changes to commit"
 
-      # Step 4: Push to Hugging Face Space
+      # Step 4: Convert existing binaries to LFS
+      - name: Convert existing binaries to LFS
+        run: |
+          # Find all images in the repo and re-add them for LFS
+          find . -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" \) -exec git add {} \;
+          git commit -m "Move existing binaries to LFS" || echo "No binaries to convert"
+
+      # Step 5: Push to Hugging Face Space
       - name: Push to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
