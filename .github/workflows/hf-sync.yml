@@ -41,7 +41,7 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@users.noreply.github.com"
 
-          # Add Hugging Face Space as remote
+          # Add HF Space remote using token authentication
           git remote add hf-space https://satyaprakashmohanty13:$HF_TOKEN@huggingface.co/spaces/satyaprakashmohanty13/Repo-push
 
           # Push master branch to HF Space main branch
